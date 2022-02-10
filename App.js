@@ -64,6 +64,13 @@ function UserInfo() {
     }
     dispatch({ type: 'SET_USER', payloads: data })
   }
+  reset = () => {
+    setEmail();
+    setFirstName();
+    setLastName();
+    setPhone();
+    dispatch({ type: 'USER_SUBMITED', payloads: {} })
+  }
   return (
     <View style={{ margin: 50 }}>
       {user?.first_name ?
@@ -73,7 +80,7 @@ function UserInfo() {
           <Text>Email: {user?.email}</Text>
           <Text>Phone: {user?.phone}</Text>
           <Button
-            onPress={() => dispatch({ type: 'USER_SUBMITED', payloads: {} })}
+            onPress={() => reset()}
             title="Reset"
           />
         </View>
