@@ -152,15 +152,7 @@ function Directions() {
 function Chunks() {
   const [joke, setJokes] = useState()
   const [list, setList] = useState([])
-  const ref = useRef();
-  const previousJoke = getPreviousJoke(joke)
-  function getPreviousJoke(value){
-    useEffect(() => {
-      ref.current = value;
-    }, [value]);
-    return ref.current;
-  }
-
+  
   useEffect(() => {
     getData()
   }, [])
