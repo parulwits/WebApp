@@ -11,6 +11,8 @@ import type { Node } from 'react';
 import {
   Button,
   Dimensions,
+  Image,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -22,6 +24,7 @@ import {
 } from 'react-native';
 import MapView from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Provider, useDispatch, useSelector } from 'react-redux'
 import { store, persistor } from './src/redux/store';
@@ -43,7 +46,8 @@ const App: () => Node = () => {
             style={backgroundStyle}>
             {/* <UserInfo /> */}
             {/* <Directions /> */}
-            <Chunks />
+            {/* <Chunks /> */}
+            <ImagePickerComponent/>
           </ScrollView>
         </SafeAreaView>
       </PersistGate>
@@ -140,11 +144,11 @@ function Directions() {
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
     }}>
-      <MapViewDirections
+      {/* <MapViewDirections
         origin={origin}
         destination={destination}
         apikey={GOOGLE_MAPS_APIKEY}
-      />
+      /> */}
     </MapView>
   )
 }
@@ -201,6 +205,78 @@ function Chunks() {
           title="Next"
         />
       </View>
+
+    </View>
+  )
+}
+function ImagePickerComponent() {
+  const [image,setImage] = useState("https://reactjs.org/logo-og.png")
+ 
+  openCamera= ()=>{
+    const options ={
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    }
+    launchCamera(options, res => {
+
+      console.log('Response = ', res);
+
+      if (res.errorCode) {
+
+        alert(res.errorCode);
+        
+      } else {
+
+        console.log('res', JSON.stringify(res));
+
+        setImage(res.assets[0].uri)
+      }
+
+    });
+  }
+  openLibrary= async ()=>{
+    const options ={
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    }
+    launchImageLibrary(options, res => {
+
+      console.log('Response = ', res);
+
+      if (res.errorCode) {
+
+        alert(res.errorCode);
+
+      } else {
+
+        console.log('res', JSON.stringify(res));
+     
+        if(res.assets.length){
+          setImage(res.assets[0].uri)
+        }
+
+      }
+
+    });
+  }
+  return(
+    <View>
+    <Image source={{ uri: image }} style={{height:500}}/>
+
+    <View style={{ width:'100%',margin:20,flexDirection:'row', justifyContent:'space-around' }}>
+        <Button
+          onPress={() => openCamera()}
+          title="Take Photo"
+        />
+        <Button
+          onPress={() => openLibrary()}
+          title="Choose from Library"
+        />
+    </View>
 
     </View>
   )
