@@ -6,10 +6,11 @@
  * @flow strict-local
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { Node } from 'react';
 import {
   Button,
+  Dimensions,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -19,10 +20,13 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import MapView from 'react-native-maps';
+import MapViewDirections from 'react-native-maps-directions';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Provider, useDispatch, useSelector } from 'react-redux'
-import {store, persistor} from './src/redux/store';
+import { store, persistor } from './src/redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
+const { height, width } = Dimensions.get('window');
 const App: () => Node = () => {
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -32,14 +36,16 @@ const App: () => Node = () => {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-      <SafeAreaView style={backgroundStyle}>
-        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={backgroundStyle}>
-          <UserInfo />
-        </ScrollView>
-      </SafeAreaView>
+        <SafeAreaView style={backgroundStyle}>
+          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+          <ScrollView
+            contentInsetAdjustmentBehavior="automatic"
+            style={backgroundStyle}>
+            {/* <UserInfo /> */}
+            {/* <Directions /> */}
+            <Chunks />
+          </ScrollView>
+        </SafeAreaView>
       </PersistGate>
     </Provider>
   );
@@ -118,6 +124,92 @@ function UserInfo() {
           />
         </View>
       }
+    </View>
+  )
+}
+
+function Directions() {
+  const origin = { latitude: 37.3318456, longitude: -122.0296002 };
+  const destination = { latitude: 37.771707, longitude: -122.4053769 };
+  const GOOGLE_MAPS_APIKEY = 'AIzaSyCxvKKhSh379jxDPtIBzHMmPjoUO9gSCbQ';
+
+  return (
+    <MapView initialRegion={{
+      latitude: 37.78825,
+      longitude: -122.4324,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    }}>
+      <MapViewDirections
+        origin={origin}
+        destination={destination}
+        apikey={GOOGLE_MAPS_APIKEY}
+      />
+    </MapView>
+  )
+}
+
+function Chunks() {
+  const [joke, setJokes] = useState()
+  const [list, setList] = useState([])
+  const ref = useRef();
+  const previousJoke = getPreviousJoke(joke)
+  function getPreviousJoke(value){
+    useEffect(() => {
+      ref.current = value;
+    }, [value]);
+    return ref.current;
+  }
+
+  useEffect(() => {
+    getData()
+  }, [])
+
+  getData=()=>{
+    fetch('https://api.chucknorris.io/jokes/random')
+      .then(response => response.json())
+      .then(data => {
+        setJokes(data.value)
+        list.push(data.value)
+      });
+  }
+  showNext = () => {
+    if(list.length > 1){
+      const index = list.indexOf(joke)
+      if(index!== list.length-1){
+        setJokes(list[index+1])
+      }else{
+        getData()
+      }     
+    }else{
+    getData()
+    }
+  }
+  showPrevious = () => {
+    if(list.length >1){
+      const index = list.indexOf(joke)
+      if(index!==0){
+      setJokes(list[index-1])
+      }else{
+        // do nothing
+      }
+    }
+  }
+  return (
+    <View style={{ height: height * 0.8, marginHorizontal: 20, alignItems: 'center', justifyContent: 'center' }}>
+      <Text style={{ fontSize: 30, fontWeight: 'bold' }}>{joke}</Text>
+    
+      <View style={{ width:'100%',margin:20,flexDirection:'row', justifyContent:'space-around' }}>
+        <Button
+          onPress={() => showPrevious()}
+          title="Previous"
+        />
+        <Button
+          onPress={() => showNext()}
+          title="Next"
+        />
+      </View>
+
     </View>
   )
 }
