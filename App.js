@@ -230,8 +230,10 @@ function ImagePickerComponent() {
       } else {
 
         console.log('res', JSON.stringify(res));
-
-        setImage(res.assets[0].uri)
+     
+        if(res.assets?.length){
+          setImage(res.assets[0].uri)
+        }
       }
 
     });
@@ -255,7 +257,7 @@ function ImagePickerComponent() {
 
         console.log('res', JSON.stringify(res));
      
-        if(res.assets.length){
+        if(res.assets?.length){
           setImage(res.assets[0].uri)
         }
 
