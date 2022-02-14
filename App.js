@@ -24,11 +24,12 @@ import {
 } from 'react-native';
 import MapView from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Provider, useDispatch, useSelector } from 'react-redux'
 import { store, persistor } from './src/redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 const { height, width } = Dimensions.get('window');
 const App: () => Node = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -47,7 +48,7 @@ const App: () => Node = () => {
             {/* <UserInfo /> */}
             {/* <Directions /> */}
             {/* <Chunks /> */}
-            <ImagePickerComponent/>
+            <ImagePickerComponent />
           </ScrollView>
         </SafeAreaView>
       </PersistGate>
@@ -156,12 +157,12 @@ function Directions() {
 function Chunks() {
   const [joke, setJokes] = useState()
   const [list, setList] = useState([])
-  
+
   useEffect(() => {
     getData()
   }, [])
 
-  getData=()=>{
+  getData = () => {
     fetch('https://api.chucknorris.io/jokes/random')
       .then(response => response.json())
       .then(data => {
@@ -170,23 +171,23 @@ function Chunks() {
       });
   }
   showNext = () => {
-    if(list.length > 1){
+    if (list.length > 1) {
       const index = list.indexOf(joke)
-      if(index!== list.length-1){
-        setJokes(list[index+1])
-      }else{
+      if (index !== list.length - 1) {
+        setJokes(list[index + 1])
+      } else {
         getData()
-      }     
-    }else{
-    getData()
+      }
+    } else {
+      getData()
     }
   }
   showPrevious = () => {
-    if(list.length >1){
+    if (list.length > 1) {
       const index = list.indexOf(joke)
-      if(index!==0){
-      setJokes(list[index-1])
-      }else{
+      if (index !== 0) {
+        setJokes(list[index - 1])
+      } else {
         // do nothing
       }
     }
@@ -194,8 +195,8 @@ function Chunks() {
   return (
     <View style={{ height: height * 0.8, marginHorizontal: 20, alignItems: 'center', justifyContent: 'center' }}>
       <Text style={{ fontSize: 30, fontWeight: 'bold' }}>{joke}</Text>
-    
-      <View style={{ width:'100%',margin:20,flexDirection:'row', justifyContent:'space-around' }}>
+
+      <View style={{ width: '100%', margin: 20, flexDirection: 'row', justifyContent: 'space-around' }}>
         <Button
           onPress={() => showPrevious()}
           title="Previous"
@@ -210,10 +211,10 @@ function Chunks() {
   )
 }
 function ImagePickerComponent() {
-  const [image,setImage] = useState("https://reactjs.org/logo-og.png")
- 
-  openCamera= ()=>{
-    const options ={
+  const [image, setImage] = useState("https://reactjs.org/logo-og.png")
+
+  openCamera = () => {
+    const options = {
       storageOptions: {
         skipBackup: true,
         path: 'images',
@@ -226,20 +227,20 @@ function ImagePickerComponent() {
       if (res.errorCode) {
 
         alert(res.errorCode);
-        
+
       } else {
 
         console.log('res', JSON.stringify(res));
-     
-        if(res.assets?.length){
+
+        if (res.assets?.length) {
           setImage(res.assets[0].uri)
         }
       }
 
     });
   }
-  openLibrary= async ()=>{
-    const options ={
+  openLibrary = async () => {
+    const options = {
       storageOptions: {
         skipBackup: true,
         path: 'images',
@@ -256,8 +257,8 @@ function ImagePickerComponent() {
       } else {
 
         console.log('res', JSON.stringify(res));
-     
-        if(res.assets?.length){
+
+        if (res.assets?.length) {
           setImage(res.assets[0].uri)
         }
 
@@ -265,20 +266,73 @@ function ImagePickerComponent() {
 
     });
   }
-  return(
-    <View>
-    <Image source={{ uri: image }} style={{height:500}}/>
+  checkPermissions = (string) => {
+    const permission = string == 'camera' ? Platform.OS == 'ios' ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA : Platform.OS == 'ios' ? PERMISSIONS.IOS.PHOTO_LIBRARY : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE
+    check(permission)
+      .then((result) => {
+        switch (result) {
+          case RESULTS.UNAVAILABLE:
+            alert('This feature is not available (on this device / in this context)');
+            break;
+          case RESULTS.DENIED:
+            // alert('The permission has not been requested / is denied but requestable');
+            requestPermissions(string)
+            break;
+          case RESULTS.LIMITED:
+            alert('The permission is limited: some actions are possible');
+            break;
+          case RESULTS.GRANTED:
+            // alert('The permission is granted');
+            if (string == 'camera') {
+              openCamera();
+            } else {
+              openLibrary();
+            }
+            break;
+          case RESULTS.BLOCKED:
+            alert('The permission is denied and not requestable anymore');
+            break;
+        }
+      }).catch((error) => {
+        console.log('error', error)
+      });
 
-    <View style={{ width:'100%',margin:20,flexDirection:'row', justifyContent:'space-around' }}>
+  }
+  requestPermissions = (string) => {
+    const permission = string == 'camera' ? Platform.OS == 'ios' ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA : Platform.OS == 'ios' ? PERMISSIONS.IOS.PHOTO_LIBRARY : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE
+
+    request(permission).then((result) => {
+      switch (result) {
+        case RESULTS.GRANTED:
+          if (string == 'camera') {
+            openCamera();
+          } else {
+            openLibrary();
+          }
+          break;
+        case RESULTS.BLOCKED:
+          alert('The permission is denied and not requestable anymore');
+          break;
+      }
+    }).catch((error) => {
+      console.log('error', error)
+    });
+  };
+
+  return (
+    <View>
+      <Image source={{ uri: image }} style={{ height: 500 }} />
+
+      <View style={{ width: '100%', margin: 20, flexDirection: 'row', justifyContent: 'space-around' }}>
         <Button
-          onPress={() => openCamera()}
+          onPress={() => checkPermissions('camera')}
           title="Take Photo"
         />
         <Button
-          onPress={() => openLibrary()}
+          onPress={() => checkPermissions('library')}
           title="Choose from Library"
         />
-    </View>
+      </View>
 
     </View>
   )
