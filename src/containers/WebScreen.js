@@ -1,33 +1,51 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   webViewRender,
   emit,
   useSubscribe,
 } from "react-native-react-bridge/lib/web";
+import { useForm } from 'react-hook-form';
 import './App.css'
 const Root = () => {
-  const [data, setData] = useState("");
   // useSubscribe hook receives message from React Native
   useSubscribe((message) => {
-    console.log('message from App', message)
-    if (message.type === "success") {
-      setData(message.data);
-    }
+    console.log('message', message)
   });
-  const onSubmit = () => {
-    alert('ffffff')
-    emit({ type: "hello", data: 123 });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = (data) => {
+    emit({ type: "formData", data: data });
   };
   return (
     <div className='container'>
       <div className='wrapper'>
-        Information Form {data}
-        <form onSubmit={onSubmit}>
+        Information Form
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className='form_section'>
-            <input type='text' placeholder='Name'></input>
-            <input type='text' placeholder='Age'></input>
-            <input type='text' placeholder='City'></input>
-            <input type='number' placeholder='Phone No.'></input>
+            <input
+              type='text'
+              name='name'
+              placeholder='Name'
+              {...register('name')}></input>
+            <input
+              type='text'
+              name='age'
+              placeholder='Age'
+              {...register('age')}></input>
+            <input
+              type='text'
+              name='city'
+              placeholder='City'
+              {...register('city')}></input>
+            <input
+              type='number'
+              name='phone_number'
+              placeholder='Phone No.'
+              {...register('phone_number')}></input>
             <input type='submit'></input>
           </div>
         </form>

@@ -1,33 +1,41 @@
-// App.js
-
-import React from "react";
-import WebView from "react-native-webview";
-import { useBridge } from "react-native-react-bridge";
-import webApp from "./WebScreen";
-
-const Initial = () => {
-  // useBridge hook create props for WebView and handle communication
-  // The argument is callback to receive message from React
-  const { ref, onMessage, emit } = useBridge((message) => {
-    console.log('message from WebView', message)
-    // emit sends message to React
-    //   type: event name
-    //   data: some data which will be serialized by JSON.stringify
-    if (message.type === "hello" && message.data === 123) {
-      console.log('here')
-      emit({ type: "success", data: "succeeded!" });
-    }
-  });
-
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, } from 'react-native';
+export default function Initial({ route, navigation }) {
+  const formData = route?.params?.data;
   return (
-    <WebView
-      // ref, source and onMessage must be passed to react-native-webview
-      ref={ref}
-      // Pass the source code of React app
-      source={{ html: webApp }}
-      onMessage={onMessage}
-    />
-  );
-};
+    <View style={styles.bg}>
+      {formData ?
+        <View style={{flex:0.3}}>
+          <Text>Name: {formData?.name}</Text>
+          <Text>Age: {formData?.age}</Text>
+          <Text>City: {formData?.city}</Text>
+          <Text>Phone: {formData?.phone_number}</Text>
+        </View>
+        : null}
+      <View style={styles.banner}>
+        <Text style={{ color: 'blue' }} onPress={() => navigation.navigate('TermsAndConditions')}>Tap the banner !</Text>
+      </View>
+    </View>
+  )
+}
 
-export default Initial;
+const styles = StyleSheet.create({
+  bg: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  banner: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    height: 100,
+    width: '80%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#171717',
+    shadowOffset: { width: -2, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 20,
+  }
+});
