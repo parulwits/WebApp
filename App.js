@@ -1,65 +1,22 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React, { useState, useEffect, useRef } from 'react';
-import type { Node } from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  useColorScheme,
-} from 'react-native';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import * as React from 'react';
 import Initial from './src/containers/Initial';
-import TermsAndConditions from './src/containers/TermsAndConditions';
-import WebScreen from './src/containers/WebScreen';
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import 'react-native-gesture-handler';
+const Stack = createStackNavigator();
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-  const AuthStack = createNativeStackNavigator();
-
-function AuthStackScreen() {
+function MyStack() {
   return (
-    <AuthStack.Navigator screenOptions={screenOptions} >
-      <AuthStack.Screen name="Initial" component={Initial} options={{ headerShown: false }} />
-      <AuthStack.Screen name="TermsAndConditions" component={TermsAndConditions} options={{ headerShown: false }} />
-      <AuthStack.Screen name="WebScreen" component={WebScreen} options={{ headerShown: false }} />
-
-    </AuthStack.Navigator>
+    <Stack.Navigator>
+      <Stack.Screen name="Initial" component={Initial} />
+    </Stack.Navigator>
   );
 }
-const RootStack = createNativeStackNavigator();
 
-function AppContainer() {
+export default function App() {
   return (
-    <NavigationContainer initialRouteName='Initial'>
-      <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        <RootStack.Screen name="Auth" component={AuthStackScreen} />
-      </RootStack.Navigator>
+    <NavigationContainer>
+      <MyStack />
     </NavigationContainer>
-  )
-};
-  return (
-        <SafeAreaView style={backgroundStyle}>
-          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-          <ScrollView
-            contentInsetAdjustmentBehavior="automatic"
-            style={backgroundStyle}>
-          </ScrollView>
-          <AppContainer/>
-        </SafeAreaView>
   );
-};
-
-export default App;
-
+}
