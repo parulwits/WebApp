@@ -1,0 +1,23 @@
+.container {
+    width: 100%;
+    height: calc(100vh - 30px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .wrapper {
+    max-width: 360px;
+    padding: 50px;
+    font-size: 35px;
+    font-weight: bold;
+    width: 100%;
+    background-color: rgb(73, 81, 122);
+  }
+  .form_section {
+    display: flex;
+    flex-direction: column;
+  }
+  .form_section > input {
+    margin: 10px 0px;
+    height: 30px;
+  }
