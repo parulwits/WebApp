@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, } from 'react-native';
 export default function Initial({ route, navigation }) {
   const formData = route?.params?.data;
+  console.log('formData', formData)
   return (
     <View style={styles.bg}>
       {formData ?
