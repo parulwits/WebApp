@@ -3,7 +3,7 @@
 // import { useBridge } from "react-native-react-bridge";
 // import webApp from "./WebScreen";
 
-// const TermsAndConditions = (props) => {
+// const TermsAndConditions = ({navigation}) => {
 //   // useBridge hook create props for WebView and handle communication
 //   // The argument is callback to receive message from React
 //     const { ref, onMessage, emit } = useBridge((message) => {
@@ -13,7 +13,7 @@
 //     //   data: some data which will be serialized by JSON.stringify
 //     if (message.type === "formData") {
 //       emit({ type: "success", data: "succeeded!" });
-//       props.navigation.navigate('Initial',{data: message.data})
+//       navigation.navigate('Initial',{data: message.data})
 //     }
 //   });
 
@@ -30,50 +30,43 @@
 
 // export default TermsAndConditions;
 
-import React, {useRef} from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import {
+  Button,
   SafeAreaView,
   StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
 } from 'react-native';
-import {WebView} from 'react-native-webview';
+import { WebView } from 'react-native-webview';
 
-const App = (props) => {
+const TermsAndConditions = ({ navigation }) => {
+
+  const [data, setData] = useState()
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: '',
+      headerLeft: () => (<Button
+        onPress={() => navigation.navigate('Initial', { data: data })}
+        title="Go Back"
+      />),
+    });
+  }, [navigation, data]);
   function onMessage(data) {
-    props.navigation.navigate('Initial',{data: JSON.parse(data.nativeEvent.data)})
-  }
-
-  function sendDataToWebView() {
+    setData(JSON.parse(data.nativeEvent.data))
     webviewRef.current.postMessage('Data from React Native App');
   }
 
   const webviewRef = useRef();
-
+  const INJECTED_JAVASCRIPT = `(function() {
+    const meta = document.createElement('meta'); meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'); meta.setAttribute('name', 'viewport'); document.getElementsByTagName('head')[0].appendChild(meta);
+  })();`;
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <View style={{alignItems: 'center'}}>
-        <TouchableOpacity
-          onPress={() => sendDataToWebView()}
-          style={{
-            padding: 20,
-            width: 300,
-            marginTop: 100,
-            backgroundColor: '#6751ff',
-            alignItems: 'center',
-          }}>
-          <Text style={{fontSize: 20, color: 'white'}}>
-            Send Data To WebView / Website
-          </Text>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={{ flex: 1 }}>
       <WebView
         ref={webviewRef}
-        scalesPageToFit={false}
-        mixedContentMode="compatibility"
         onMessage={onMessage}
-        source={{uri: 'http://localhost:3000/' }}
+        source={{ uri: 'http://localhost:3000/' }}
+        scrollEnabled={false}
+        injectedJavaScript={INJECTED_JAVASCRIPT}
       />
     </SafeAreaView>
   );
@@ -98,4 +91,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default TermsAndConditions;

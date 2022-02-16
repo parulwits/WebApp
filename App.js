@@ -10,7 +10,7 @@ function MyStack() {
   return (
     <Stack.Navigator >
       <Stack.Screen name="Initial" component={Initial} options={{ headerShown: false }}/>
-      <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} options={{ headerShown: false }}/>
+      <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
     </Stack.Navigator>
   );
 }
